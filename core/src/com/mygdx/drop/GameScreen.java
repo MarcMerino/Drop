@@ -27,6 +27,7 @@ public class GameScreen implements Screen {
     Array<Rectangle> raindrops;
     long lastDropTime;
     int dropsGathered;
+    int lives = 3;
 
     public GameScreen(final Drop game) {
         this.game = game;
@@ -88,6 +89,7 @@ public class GameScreen implements Screen {
         // all drops
         game.batch.begin();
         game.font.draw(game.batch, "Drops Collected: " + dropsGathered, 0, 480);
+        game.font.draw(game.batch, "Lives: " + lives, 720, 480);
         game.batch.draw(bucketImage, bucket.x, bucket.y, bucket.width, bucket.height);
         for (Rectangle raindrop : raindrops) {
             game.batch.draw(dropImage, raindrop.x, raindrop.y);
@@ -102,15 +104,26 @@ public class GameScreen implements Screen {
             bucket.x = touchPos.x - 64 / 2;
         }
         if (Gdx.input.isKeyPressed(Keys.LEFT))
-            bucket.x -= 200 * Gdx.graphics.getDeltaTime();
+            bucket.x -= 300 * Gdx.graphics.getDeltaTime();
         if (Gdx.input.isKeyPressed(Keys.RIGHT))
-            bucket.x += 200 * Gdx.graphics.getDeltaTime();
+            bucket.x += 300 * Gdx.graphics.getDeltaTime();
 
         // make sure the bucket stays within the screen bounds
         if (bucket.x < 0)
             bucket.x = 0;
         if (bucket.x > 800 - 64)
             bucket.x = 800 - 64;
+
+        for (Rectangle r : raindrops) {
+            if (r.y <= 20) {
+                raindrops.removeValue(r, true);
+                lives--;
+            }
+        }
+
+        if (lives <= 0) {
+            game.create();
+        }
 
         // check if we need to create a new raindrop
         if (TimeUtils.nanoTime() - lastDropTime > 1000000000)
